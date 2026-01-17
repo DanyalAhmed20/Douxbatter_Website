@@ -2,11 +2,15 @@
 
 import { useState } from 'react';
 import { ProductCard } from './product-card';
-import { products, categories } from '@/lib/data';
+import { categories } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
-import type { ProductCategory } from '@/lib/types';
+import type { Product, ProductCategory } from '@/lib/types';
 
-export function ProductList() {
+interface ProductListProps {
+  products: Product[];
+}
+
+export function ProductList({ products }: ProductListProps) {
   const [selectedCategory, setSelectedCategory] = useState<ProductCategory | 'All'>('All');
 
   const filteredProducts =

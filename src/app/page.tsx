@@ -1,7 +1,12 @@
 import { SiteHeader } from '@/components/site-header';
 import { ProductList } from '@/components/product-list';
+import { getProducts } from '@/lib/data';
 
-export default function Home() {
+export const dynamic = 'force-dynamic';
+
+export default async function Home() {
+  const products = await getProducts();
+
   return (
     <div className="min-h-screen flex flex-col">
       <SiteHeader />
@@ -15,7 +20,7 @@ export default function Home() {
               Handcrafted desserts made with love. All prices in AED.
             </p>
           </div>
-          <ProductList />
+          <ProductList products={products} />
         </section>
       </main>
       <footer className="border-t py-4 sm:py-6">

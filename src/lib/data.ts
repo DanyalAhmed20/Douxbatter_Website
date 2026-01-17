@@ -1,16 +1,17 @@
 import type { Product } from './types';
+import pool from './db';
+import type { ProductRow, ProductVariantRow, ProductImageRow } from './db';
+import type { RowDataPacket } from 'mysql2';
 
-// Placeholder image generator - replace these with actual product images
+// Placeholder image generator - used as fallback when no images in DB
 const getPlaceholderImages = (productId: string, count: number = 3): string[] => {
-  // Using placeholder images with different colors for visual distinction
-  // Replace these URLs with actual product images when available
-  const colors = ['E8D5B7', 'D4A574', 'C4956A', 'B8860B', 'DEB887'];
   return Array.from({ length: count }, (_, i) =>
     `/images/${productId}-${i + 1}.jpg`
   );
 };
 
-export const products: Product[] = [
+// Static fallback data (used when database is unavailable)
+const staticProducts: Product[] = [
   // ==================== COOKIES ====================
   {
     id: 'mini-cookies',
@@ -246,10 +247,76 @@ export const products: Product[] = [
   },
 ];
 
-export const categories = [
-  'Cookies',
-  'Brownies',
-  'Tiramisu',
-  'Rocky Road',
-  'Gathering Boxes',
-] as const;
+// Categories are exported from constants.ts for client-side use
+
+/**
+ * Fetch products from the database.
+ * Falls back to static data if database is unavailable.
+ */
+export async function getProducts(): Promise<Product[]> {
+  try {
+    // Check if database credentials are configured
+    if (!process.env.MYSQL_HOST || !process.env.MYSQL_DATABASE) {
+      console.log('Database not configured, using static data');
+      return staticProducts;
+    }
+
+    const [productRows] = await pool.execute<(ProductRow & RowDataPacket)[]>(
+      'SELECT * FROM products WHERE is_active = TRUE ORDER BY category, name'
+    );
+
+    if (productRows.length === 0) {
+      console.log('No products in database, using static data');
+      return staticProducts;
+    }
+
+    const [variantRows] = await pool.execute<(ProductVariantRow & RowDataPacket)[]>(
+      'SELECT * FROM product_variants ORDER BY product_id, name'
+    );
+
+    const [imageRows] = await pool.execute<(ProductImageRow & RowDataPacket)[]>(
+      'SELECT * FROM product_images ORDER BY product_id, display_order'
+    );
+
+    // Group variants and images by product_id
+    const variantsByProduct = variantRows.reduce((acc, variant) => {
+      if (!acc[variant.product_id]) {
+        acc[variant.product_id] = [];
+      }
+      acc[variant.product_id].push({
+        id: variant.id,
+        name: variant.name,
+        price: Number(variant.price),
+        description: variant.description || undefined,
+      });
+      return acc;
+    }, {} as Record<string, Product['variants']>);
+
+    const imagesByProduct = imageRows.reduce((acc, image) => {
+      if (!acc[image.product_id]) {
+        acc[image.product_id] = [];
+      }
+      acc[image.product_id].push(image.image_url);
+      return acc;
+    }, {} as Record<string, string[]>);
+
+    // Map database rows to Product type
+    const products: Product[] = productRows.map((row) => ({
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      category: row.category as Product['category'],
+      subcategory: row.subcategory || undefined,
+      variants: variantsByProduct[row.id] || [],
+      images: imagesByProduct[row.id] || getPlaceholderImages(row.id),
+    }));
+
+    return products;
+  } catch (error) {
+    console.error('Failed to fetch products from database:', error);
+    return staticProducts;
+  }
+}
+
+// Export static products for backward compatibility and migration
+export const products = staticProducts;
