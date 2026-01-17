@@ -1,5 +1,15 @@
 import type { Product } from './types';
 
+// Placeholder image generator - replace these with actual product images
+const getPlaceholderImages = (productId: string, count: number = 3): string[] => {
+  // Using placeholder images with different colors for visual distinction
+  // Replace these URLs with actual product images when available
+  const colors = ['E8D5B7', 'D4A574', 'C4956A', 'B8860B', 'DEB887'];
+  return Array.from({ length: count }, (_, i) =>
+    `/images/${productId}-${i + 1}.jpg`
+  );
+};
+
 export const products: Product[] = [
   // ==================== COOKIES ====================
   {
@@ -7,6 +17,7 @@ export const products: Product[] = [
     name: 'Mini Cookies',
     description: 'Bite-sized delicious cookies, perfect for sharing. Served with dipping sauces.',
     category: 'Cookies',
+    images: getPlaceholderImages('mini-cookies'),
     variants: [
       {
         id: 'mini-cookies-300g',
@@ -27,6 +38,7 @@ export const products: Product[] = [
     name: 'Chocolate Chip Cookies',
     description: 'Classic chocolate chip cookies, perfectly baked with premium chocolate chips.',
     category: 'Cookies',
+    images: getPlaceholderImages('chocolate-chip-cookies'),
     variants: [
       {
         id: 'choc-chip-8',
@@ -45,6 +57,7 @@ export const products: Product[] = [
     name: 'Brown Butter Espresso Cookies',
     description: 'Rich brown butter cookies infused with espresso for a sophisticated flavor.',
     category: 'Cookies',
+    images: getPlaceholderImages('brown-butter-espresso-cookies'),
     variants: [
       {
         id: 'espresso-8',
@@ -66,6 +79,7 @@ export const products: Product[] = [
     description: 'Rich, fudgy brownies with optional walnut topping. Available with or without toppings.',
     category: 'Brownies',
     subcategory: 'Classics',
+    images: getPlaceholderImages('classic-brownies'),
     variants: [
       {
         id: 'classic-25',
@@ -89,6 +103,7 @@ export const products: Product[] = [
     name: 'Mini Brownies',
     description: 'Bite-sized brownies, perfect for gatherings. Available with or without toppings.',
     category: 'Brownies',
+    images: getPlaceholderImages('mini-brownies'),
     variants: [
       {
         id: 'mini-brownie-64',
@@ -107,6 +122,7 @@ export const products: Product[] = [
     name: 'Brownie Dips',
     description: 'Delicious brownie bites perfect for dipping. Served with dipping sauces.',
     category: 'Brownies',
+    images: getPlaceholderImages('brownie-dips'),
     variants: [
       {
         id: 'brownie-dips-120',
@@ -129,6 +145,7 @@ export const products: Product[] = [
     name: 'Tiramisu',
     description: 'Classic Italian dessert with layers of coffee-soaked ladyfingers and mascarpone cream.',
     category: 'Tiramisu',
+    images: getPlaceholderImages('tiramisu'),
     variants: [
       {
         id: 'tiramisu-xs',
@@ -163,6 +180,7 @@ export const products: Product[] = [
     name: 'Rocky Road',
     description: 'Indulgent chocolate rocky road loaded with marshmallows and nuts.',
     category: 'Rocky Road',
+    images: getPlaceholderImages('rocky-road'),
     variants: [
       {
         id: 'rocky-400g',
@@ -183,6 +201,7 @@ export const products: Product[] = [
     name: 'Large Gathering Box',
     description: 'Perfect for parties and large gatherings. Choose your preferred combination. Includes 4 sauces.',
     category: 'Gathering Boxes',
+    images: getPlaceholderImages('large-gathering-box'),
     variants: [
       {
         id: 'large-box-cookies-brownies',
@@ -206,6 +225,7 @@ export const products: Product[] = [
     name: 'Mini Gathering Box',
     description: 'Great for smaller gatherings. Choose your preferred combination. Includes 2 sauces.',
     category: 'Gathering Boxes',
+    images: getPlaceholderImages('mini-gathering-box'),
     variants: [
       {
         id: 'mini-box-cookies-brownies',

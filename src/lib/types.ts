@@ -19,7 +19,7 @@ export type Product = {
   category: ProductCategory;
   subcategory?: string;
   variants: ProductVariant[];
-  imageId?: string;
+  images: string[];
 };
 
 export type CartItem = {
