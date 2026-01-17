@@ -17,9 +17,15 @@ export function SiteHeader() {
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 py-3 sm:py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <a href="/" className="flex items-center gap-2 sm:gap-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo.jpg"
+              alt="DouxBatter Logo"
+              className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover"
+            />
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight">DouxBatter</h1>
-          </div>
+          </a>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6 text-sm">
@@ -58,7 +64,15 @@ export function SiteHeader() {
             </SheetTrigger>
             <SheetContent side="right" className="w-[280px] sm:w-[320px]">
               <div className="flex flex-col gap-6 mt-8">
-                <SheetTitle>DouxBatter</SheetTitle>
+                <div className="flex items-center gap-3">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/logo.jpg"
+                    alt="DouxBatter Logo"
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                  <SheetTitle>DouxBatter</SheetTitle>
+                </div>
                 <nav className="flex flex-col gap-4">
                   {navLinks.map((link) => (
                     <a
