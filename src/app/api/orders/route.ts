@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { generateReferenceNumber } from '@/lib/order-server';
-import { createPaymentIntent } from '@/lib/ziina';
+import { createPaymentIntent, ZiinaError } from '@/lib/ziina';
 import { generateWhatsAppUrl } from '@/lib/whatsapp';
 import type { ResultSetHeader } from 'mysql2';
 import type { OrderItem, UAECity, DeliveryType, DeliveryTimeSlot } from '@/lib/types';
@@ -101,43 +101,68 @@ export async function POST(request: Request) {
       createdAt: new Date().toISOString(),
     };
 
-    try {
-      const paymentIntent = await createPaymentIntent(order);
+    // Create payment intent with Ziina
+    const paymentIntent = await createPaymentIntent(order);
 
-      if (paymentIntent.redirect_url) {
-        // Update order with Ziina payment ID
-        await pool.execute(
-          'UPDATE orders SET ziina_payment_id = ? WHERE id = ?',
-          [paymentIntent.id, orderId]
-        );
+    if (paymentIntent.redirect_url) {
+      // Update order with Ziina payment ID
+      await pool.execute(
+        'UPDATE orders SET ziina_payment_id = ? WHERE id = ?',
+        [paymentIntent.id, orderId]
+      );
 
-        // Generate WhatsApp URL for business owner notification
-        const whatsAppUrl = generateWhatsAppUrl(order);
+      // Generate WhatsApp URL for business owner notification
+      const whatsAppUrl = generateWhatsAppUrl(order);
 
-        return NextResponse.json({
-          success: true,
-          referenceNumber,
-          orderId,
-          redirectUrl: paymentIntent.redirect_url,
-          whatsAppUrl,
-        });
-      }
-    } catch (paymentError) {
-      console.error('Payment intent creation failed:', paymentError);
-      // Continue without payment - order is created but payment pending
+      return NextResponse.json({
+        success: true,
+        referenceNumber,
+        orderId,
+        redirectUrl: paymentIntent.redirect_url,
+        whatsAppUrl,
+      });
     }
 
-    // If payment intent failed or no redirect URL, return order confirmation
-    return NextResponse.json({
-      success: true,
-      referenceNumber,
-      orderId,
-      whatsAppUrl: generateWhatsAppUrl(order),
-    });
-  } catch (error) {
-    console.error('Order creation error:', error);
+    // If no redirect URL returned (shouldn't happen normally)
+    console.error('[Orders] Payment intent created but no redirect URL:', paymentIntent);
     return NextResponse.json(
-      { error: 'Failed to create order' },
+      { error: 'Payment service returned an incomplete response' },
+      { status: 500 }
+    );
+  } catch (error) {
+    console.error('[Orders] Order creation error:', error);
+
+    // Handle Ziina-specific errors
+    if (error instanceof ZiinaError) {
+      return NextResponse.json(
+        {
+          error: error.message,
+          code: 'PAYMENT_SERVICE_ERROR',
+          ...(process.env.NODE_ENV !== 'production' && { details: error.apiError }),
+        },
+        { status: error.statusCode }
+      );
+    }
+
+    // Handle database connection errors
+    if (error && typeof error === 'object' && 'code' in error) {
+      const dbError = error as { code: string; message?: string };
+      if (dbError.code === 'ECONNREFUSED' || dbError.code === 'ENOTFOUND') {
+        return NextResponse.json(
+          { error: 'Database connection failed', code: 'DATABASE_ERROR' },
+          { status: 503 }
+        );
+      }
+    }
+
+    // Generic error with message in non-production
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json(
+      {
+        error: 'Failed to create order',
+        code: 'INTERNAL_ERROR',
+        ...(process.env.NODE_ENV !== 'production' && { details: errorMessage }),
+      },
       { status: 500 }
     );
   }
