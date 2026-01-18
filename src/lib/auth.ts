@@ -126,8 +126,20 @@ export async function cleanupExpiredSessions(): Promise<void> {
 export function verifyPassword(password: string): boolean {
   const adminPassword = process.env.ADMIN_PASSWORD;
   if (!adminPassword) {
-    console.error('ADMIN_PASSWORD environment variable is not set');
+    console.error('[Auth] ADMIN_PASSWORD environment variable is not set');
     return false;
   }
-  return password === adminPassword;
+
+  const isValid = password === adminPassword;
+
+  if (!isValid) {
+    console.error('[Auth] Password verification failed', {
+      providedLength: password.length,
+      expectedLength: adminPassword.length,
+      providedTrimmedLength: password.trim().length,
+      expectedTrimmedLength: adminPassword.trim().length,
+    });
+  }
+
+  return isValid;
 }
