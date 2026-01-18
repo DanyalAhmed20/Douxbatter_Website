@@ -14,6 +14,8 @@ import {
   UAE_CITIES,
   EXPRESS_DELIVERY_CITIES,
   DELIVERY_TIME_SLOTS,
+  STANDARD_DELIVERY_FEE,
+  EXPRESS_DELIVERY_FEE,
   type UAECity,
   type DeliveryTimeSlot,
   type DeliveryType,
@@ -87,9 +89,12 @@ export function DeliveryPicker({
             <div className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-secondary/50 cursor-pointer">
               <RadioGroupItem value="standard" id="standard" className="mt-1" />
               <div className="flex-1">
-                <Label htmlFor="standard" className="font-medium cursor-pointer">
-                  Standard Delivery
-                </Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="standard" className="font-medium cursor-pointer">
+                    Standard Delivery
+                  </Label>
+                  <span className="text-sm font-medium">{STANDARD_DELIVERY_FEE} AED</span>
+                </div>
                 <p className="text-sm text-muted-foreground">
                   Available for all UAE cities
                 </p>
@@ -109,12 +114,15 @@ export function DeliveryPicker({
                 className="mt-1"
               />
               <div className="flex-1">
-                <Label
-                  htmlFor="express"
-                  className={`font-medium ${canSelectExpress ? 'cursor-pointer' : 'cursor-not-allowed'}`}
-                >
-                  Express Delivery
-                </Label>
+                <div className="flex items-center justify-between">
+                  <Label
+                    htmlFor="express"
+                    className={`font-medium ${canSelectExpress ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                  >
+                    Express Delivery
+                  </Label>
+                  <span className="text-sm font-medium">{EXPRESS_DELIVERY_FEE} AED</span>
+                </div>
                 <p className="text-sm text-muted-foreground">
                   {canSelectExpress
                     ? 'Same-day or next-day delivery'
@@ -145,8 +153,8 @@ export function DeliveryPicker({
         </div>
       )}
 
-      {/* Delivery Time Slot */}
-      {city && deliveryDate && (
+      {/* Delivery Time Slot - Only for Express Delivery */}
+      {city && deliveryDate && deliveryType === 'express' && (
         <div className="space-y-2">
           <Label htmlFor="time-slot">Preferred Time Slot *</Label>
           <Select

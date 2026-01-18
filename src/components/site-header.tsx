@@ -12,7 +12,7 @@ export function SiteHeader() {
   const itemCount = getItemCount();
 
   const navLinks = [
-    { href: '#menu', label: 'Menu' },
+    { href: '/#menu', label: 'Menu' },
     { href: '/track-order', label: 'Track Order' },
     { href: 'https://wa.me/971507467480', label: 'Contact', external: true },
   ];

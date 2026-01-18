@@ -3,7 +3,8 @@ export type ProductCategory =
   | 'Brownies'
   | 'Tiramisu'
   | 'Rocky Road'
-  | 'Gathering Boxes';
+  | 'Gathering Boxes'
+  | 'Custom Orders';
 
 export type ProductVariant = {
   id: string;
@@ -45,6 +46,10 @@ export const UAE_CITIES: UAECity[] = ['Dubai', 'Abu Dhabi', 'Sharjah', 'Ajman', 
 export const EXPRESS_DELIVERY_CITIES: UAECity[] = ['Dubai', 'Sharjah', 'Ajman', 'Umm Al Quwain'];
 
 export const DELIVERY_TIME_SLOTS: DeliveryTimeSlot[] = ['9AM-12PM', '12PM-3PM', '3PM-6PM', '6PM-9PM'];
+
+// Delivery fees in AED
+export const STANDARD_DELIVERY_FEE = 35;
+export const EXPRESS_DELIVERY_FEE = 60;
 
 export type OrderItem = {
   id?: number;

@@ -10,7 +10,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DeliveryPicker } from './delivery-picker';
 import { useCart } from '@/components/cart/cart-provider';
-import type { UAECity, DeliveryType, DeliveryTimeSlot, OrderItem } from '@/lib/types';
+import {
+  STANDARD_DELIVERY_FEE,
+  EXPRESS_DELIVERY_FEE,
+  type UAECity,
+  type DeliveryType,
+  type DeliveryTimeSlot,
+  type OrderItem,
+} from '@/lib/types';
 
 export function CheckoutForm() {
   const router = useRouter();
@@ -32,7 +39,8 @@ export function CheckoutForm() {
   const [deliveryTimeSlot, setDeliveryTimeSlot] = useState<DeliveryTimeSlot | ''>('');
 
   const subtotal = getSubtotal();
-  const total = subtotal; // Can add delivery fee logic here if needed
+  const deliveryFee = deliveryType === 'express' ? EXPRESS_DELIVERY_FEE : STANDARD_DELIVERY_FEE;
+  const total = subtotal + deliveryFee;
 
   const isFormValid =
     customerName.trim() &&
@@ -40,7 +48,7 @@ export function CheckoutForm() {
     city &&
     deliveryAddress.trim() &&
     deliveryDate &&
-    deliveryTimeSlot &&
+    (deliveryType === 'standard' || deliveryTimeSlot) &&
     items.length > 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -229,12 +237,18 @@ export function CheckoutForm() {
             })}
           </div>
 
-          <div className="border-t pt-4">
+          <div className="border-t pt-4 space-y-2">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Subtotal</span>
               <span>{subtotal.toFixed(2)} AED</span>
             </div>
-            <div className="flex justify-between font-semibold text-lg mt-2">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">
+                Delivery ({deliveryType === 'express' ? 'Express' : 'Standard'})
+              </span>
+              <span>{deliveryFee.toFixed(2)} AED</span>
+            </div>
+            <div className="flex justify-between font-semibold text-lg pt-2 border-t">
               <span>Total</span>
               <span>{total.toFixed(2)} AED</span>
             </div>

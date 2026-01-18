@@ -4,4 +4,5 @@ export const categories = [
   'Tiramisu',
   'Rocky Road',
   'Gathering Boxes',
+  'Custom Orders',
 ] as const;
