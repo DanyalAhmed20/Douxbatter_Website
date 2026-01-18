@@ -23,11 +23,24 @@ export type Product = {
   images: string[];
 };
 
+// Available sauce options
+export const SAUCE_OPTIONS = [
+  'Lotus Biscoff',
+  'Nutella',
+  'Pistachio',
+  'Kinder Bueno',
+  'Milk Chocolate',
+  'White Chocolate',
+] as const;
+
+export type SauceOption = (typeof SAUCE_OPTIONS)[number];
+
 export type CartItem = {
   id: string;
   product: Product;
   variantId: string;
   quantity: number;
+  selectedSauces?: SauceOption[];
 };
 
 // Order-related types
@@ -60,6 +73,7 @@ export type OrderItem = {
   quantity: number;
   unitPrice: number;
   totalPrice: number;
+  selectedSauces?: SauceOption[];
 };
 
 export type Order = {

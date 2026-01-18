@@ -66,8 +66,8 @@ export async function POST(request: Request) {
       await pool.execute(
         `INSERT INTO order_items (
           order_id, product_id, product_name, variant_id, variant_name,
-          quantity, unit_price, total_price
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          quantity, unit_price, total_price, selected_sauces
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           orderId,
           item.productId,
@@ -77,6 +77,7 @@ export async function POST(request: Request) {
           item.quantity,
           item.unitPrice,
           item.totalPrice,
+          item.selectedSauces ? JSON.stringify(item.selectedSauces) : null,
         ]
       );
     }

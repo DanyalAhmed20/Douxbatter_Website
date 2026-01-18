@@ -1,11 +1,11 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
-import type { Product, CartItem } from '@/lib/types';
+import type { Product, CartItem, SauceOption } from '@/lib/types';
 
 type CartContextType = {
   items: CartItem[];
-  addItem: (product: Product, variantId: string, quantity?: number) => void;
+  addItem: (product: Product, variantId: string, quantity?: number, sauces?: SauceOption[]) => void;
   removeItem: (itemId: string) => void;
   updateQuantity: (itemId: string, quantity: number) => void;
   clearCart: () => void;
@@ -51,12 +51,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [items, isLoaded]);
 
-  const addItem = useCallback((product: Product, variantId: string, quantity = 1) => {
+  const addItem = useCallback((product: Product, variantId: string, quantity = 1, sauces?: SauceOption[]) => {
     setItems((prev) => {
-      // Check if item with same product and variant already exists
-      const existingIndex = prev.findIndex(
-        (item) => item.product.id === product.id && item.variantId === variantId
-      );
+      // Check if item with same product, variant, and sauces already exists
+      const saucesKey = sauces ? [...sauces].sort().join(',') : '';
+      const existingIndex = prev.findIndex((item) => {
+        const itemSaucesKey = item.selectedSauces ? [...item.selectedSauces].sort().join(',') : '';
+        return item.product.id === product.id && item.variantId === variantId && itemSaucesKey === saucesKey;
+      });
 
       if (existingIndex >= 0) {
         // Update quantity of existing item
@@ -74,6 +76,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         product,
         variantId,
         quantity,
+        selectedSauces: sauces,
       };
       return [...prev, newItem];
     });

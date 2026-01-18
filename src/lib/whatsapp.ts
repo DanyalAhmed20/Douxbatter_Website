@@ -7,10 +7,13 @@ const WHATSAPP_NUMBER = '971507467480';
  */
 export function generateOrderMessage(order: Order): string {
   const itemsList = order.items
-    .map(
-      (item: OrderItem) =>
-        `- ${item.productName} (${item.variantName}) x${item.quantity} = ${Number(item.totalPrice).toFixed(2)} AED`
-    )
+    .map((item: OrderItem) => {
+      let line = `- ${item.productName} (${item.variantName}) x${item.quantity} = ${Number(item.totalPrice).toFixed(2)} AED`;
+      if (item.selectedSauces && item.selectedSauces.length > 0) {
+        line += `\n  Sauces: ${item.selectedSauces.join(', ')}`;
+      }
+      return line;
+    })
     .join('\n');
 
   const message = `

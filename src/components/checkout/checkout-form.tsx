@@ -74,6 +74,7 @@ export function CheckoutForm() {
           quantity: item.quantity,
           unitPrice: variant?.price || 0,
           totalPrice: (variant?.price || 0) * item.quantity,
+          selectedSauces: item.selectedSauces,
         };
       });
 
@@ -222,16 +223,23 @@ export function CheckoutForm() {
           <CardTitle className="text-lg">Order Summary</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
+          <div className="space-y-3">
             {items.map((item) => {
               const variant = item.product.variants.find((v) => v.id === item.variantId);
               const itemTotal = (variant?.price || 0) * item.quantity;
               return (
-                <div key={item.id} className="flex justify-between text-sm">
-                  <span>
-                    {item.product.name} ({variant?.name}) x{item.quantity}
-                  </span>
-                  <span>{itemTotal.toFixed(2)} AED</span>
+                <div key={item.id} className="text-sm">
+                  <div className="flex justify-between">
+                    <span>
+                      {item.product.name} ({variant?.name}) x{item.quantity}
+                    </span>
+                    <span>{itemTotal.toFixed(2)} AED</span>
+                  </div>
+                  {item.selectedSauces && item.selectedSauces.length > 0 && (
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Sauces: {item.selectedSauces.join(', ')}
+                    </p>
+                  )}
                 </div>
               );
             })}

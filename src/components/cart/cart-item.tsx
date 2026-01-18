@@ -37,6 +37,11 @@ export function CartItem({ item }: CartItemProps) {
         <p className="text-xs text-muted-foreground mt-0.5">
           {variant?.name}
         </p>
+        {item.selectedSauces && item.selectedSauces.length > 0 && (
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Sauces: {item.selectedSauces.join(', ')}
+          </p>
+        )}
         <p className="text-sm font-semibold text-primary mt-1">
           {totalPrice.toFixed(2)} AED
         </p>
