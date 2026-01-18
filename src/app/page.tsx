@@ -17,7 +17,7 @@ export default async function Home() {
               Our Menu
             </h2>
             <p className="text-sm sm:text-base text-muted-foreground">
-              Handcrafted desserts made with love. All prices in AED.
+              Handcrafted desserts made with love.
             </p>
           </div>
           <ProductList products={products} />

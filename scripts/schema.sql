@@ -40,3 +40,43 @@ CREATE TABLE IF NOT EXISTS admin_sessions (
   INDEX idx_token (token),
   INDEX idx_expires_at (expires_at)
 );
+
+-- Orders table
+CREATE TABLE IF NOT EXISTS orders (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  reference_number VARCHAR(20) NOT NULL UNIQUE,
+  customer_name VARCHAR(255) NOT NULL,
+  customer_phone VARCHAR(50) NOT NULL,
+  customer_email VARCHAR(255),
+  city VARCHAR(50) NOT NULL,
+  delivery_address TEXT NOT NULL,
+  delivery_type ENUM('standard','express') DEFAULT 'standard',
+  delivery_date DATE NOT NULL,
+  delivery_time_slot VARCHAR(50) NOT NULL,
+  subtotal DECIMAL(10,2) NOT NULL,
+  total DECIMAL(10,2) NOT NULL,
+  status ENUM('pending','confirmed','preparing','ready','delivered','cancelled') DEFAULT 'pending',
+  payment_status ENUM('pending','paid','failed') DEFAULT 'pending',
+  ziina_payment_id VARCHAR(100),
+  admin_notes TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_reference_number (reference_number),
+  INDEX idx_status (status),
+  INDEX idx_payment_status (payment_status),
+  INDEX idx_created_at (created_at)
+);
+
+-- Order items table
+CREATE TABLE IF NOT EXISTS order_items (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  order_id INT NOT NULL,
+  product_id VARCHAR(100) NOT NULL,
+  product_name VARCHAR(255) NOT NULL,
+  variant_id VARCHAR(100) NOT NULL,
+  variant_name VARCHAR(255) NOT NULL,
+  quantity INT NOT NULL,
+  unit_price DECIMAL(10,2) NOT NULL,
+  total_price DECIMAL(10,2) NOT NULL,
+  FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
+);

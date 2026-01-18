@@ -1,11 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ProductTable } from '@/components/admin/product-table';
-import { Plus } from 'lucide-react';
+import { Plus, Package } from 'lucide-react';
 
 type Product = {
   id: string;
@@ -18,14 +17,7 @@ type Product = {
   images: string[];
 };
 
-export default function DashboardPage() {
-  const router = useRouter();
-
-  // Redirect to orders page by default
-  useEffect(() => {
-    router.replace('/admin/dashboard/orders');
-  }, [router]);
-
+export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -73,7 +65,10 @@ export default function DashboardPage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Products</h2>
+        <div className="flex items-center gap-3">
+          <Package className="h-6 w-6" />
+          <h2 className="text-2xl font-bold text-gray-900">Products</h2>
+        </div>
         <Link href="/admin/dashboard/products/new">
           <Button>
             <Plus className="h-4 w-4 mr-2" />

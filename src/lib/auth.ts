@@ -90,7 +90,6 @@ export async function verifySession(): Promise<boolean> {
   if (isDatabaseConfigured()) {
     // Verify against database
     const pool = (await import('./db')).default;
-    const { RowDataPacket } = await import('mysql2');
 
     const [rows] = await pool.execute<any[]>(
       'SELECT * FROM admin_sessions WHERE token = ? AND expires_at > NOW()',
