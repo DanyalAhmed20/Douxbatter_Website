@@ -14,7 +14,7 @@ type CreateOrderRequest = {
   deliveryAddress: string;
   deliveryType: DeliveryType;
   deliveryDate: string;
-  deliveryTimeSlot: DeliveryTimeSlot;
+  deliveryTimeSlot: DeliveryTimeSlot | '';
   items: OrderItem[];
   subtotal: number;
   total: number;
@@ -26,10 +26,18 @@ export async function POST(request: Request) {
 
     // Validate required fields
     if (!body.customerName || !body.customerPhone || !body.city ||
-        !body.deliveryAddress || !body.deliveryDate || !body.deliveryTimeSlot ||
+        !body.deliveryAddress || !body.deliveryDate ||
         !body.items || body.items.length === 0) {
       return NextResponse.json(
         { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
+    // Validate time slot is required for express delivery
+    if (body.deliveryType === 'express' && !body.deliveryTimeSlot) {
+      return NextResponse.json(
+        { error: 'Time slot is required for express delivery' },
         { status: 400 }
       );
     }

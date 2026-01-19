@@ -86,7 +86,7 @@ export type Order = {
   deliveryAddress: string;
   deliveryType: DeliveryType;
   deliveryDate: string;
-  deliveryTimeSlot: DeliveryTimeSlot;
+  deliveryTimeSlot: DeliveryTimeSlot | '';
   items: OrderItem[];
   subtotal: number;
   total: number;
