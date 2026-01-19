@@ -164,13 +164,15 @@ export async function POST(request: Request) {
       }
     }
 
-    // Generic error with message in non-production
+    // Generic error - temporarily show details for debugging
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : undefined;
     return NextResponse.json(
       {
         error: 'Failed to create order',
         code: 'INTERNAL_ERROR',
-        ...(process.env.NODE_ENV !== 'production' && { details: errorMessage }),
+        details: errorMessage,
+        stack: errorStack,
       },
       { status: 500 }
     );
