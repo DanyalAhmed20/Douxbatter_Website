@@ -107,9 +107,9 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
         <Button
           onClick={handleAddClick}
           disabled={!selectedVariant}
-          className="w-full"
+          className="w-full h-12 text-base touch-manipulation"
         >
-          <ShoppingCart className="h-4 w-4 mr-2" />
+          <ShoppingCart className="h-5 w-5 mr-2" />
           Add to Cart
           {selectedVariant && ` - ${formatCurrency(selectedVariant.price)}`}
         </Button>
@@ -123,15 +123,19 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
             </DialogTitle>
           </DialogHeader>
 
-          <div className="grid grid-cols-2 gap-4 py-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 py-4">
             {SAUCE_OPTIONS.map((sauce) => (
-              <div key={sauce} className="flex items-center space-x-2">
+              <div
+                key={sauce}
+                className="flex items-center space-x-3 p-3 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors touch-manipulation"
+                onClick={() => handleSauceToggle(sauce)}
+              >
                 <Checkbox
                   id={sauce}
                   checked={selectedSauces.includes(sauce)}
-                  onCheckedChange={() => handleSauceToggle(sauce)}
+                  className="h-5 w-5 pointer-events-none"
                 />
-                <Label htmlFor={sauce} className="text-sm cursor-pointer">
+                <Label className="text-sm cursor-pointer flex-1 pointer-events-none">
                   {sauce}
                 </Label>
               </div>
@@ -142,16 +146,18 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
             Selected: {selectedSauces.length} / {sauceCount}
           </p>
 
-          <DialogFooter>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button
               variant="outline"
               onClick={() => setShowSaucePicker(false)}
+              className="w-full sm:w-auto h-11 touch-manipulation"
             >
               Cancel
             </Button>
             <Button
               onClick={handleConfirmSauces}
               disabled={selectedSauces.length !== sauceCount}
+              className="w-full sm:w-auto h-11 touch-manipulation"
             >
               Add to Cart
             </Button>

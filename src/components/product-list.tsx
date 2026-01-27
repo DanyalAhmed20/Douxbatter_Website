@@ -28,12 +28,13 @@ export function ProductList({ products }: ProductListProps) {
   return (
     <div className="space-y-6">
       {/* Category Filters */}
-      <ScrollArea className="w-full whitespace-nowrap">
-        <div className="flex gap-2 pb-2">
+      <ScrollArea className="w-full whitespace-nowrap -mx-4 px-4">
+        <div className="flex gap-2 pb-3">
           <Button
             variant={selectedCategory === 'All' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setSelectedCategory('All')}
+            className="h-10 px-4 rounded-full touch-manipulation"
           >
             All
           </Button>
@@ -43,6 +44,7 @@ export function ProductList({ products }: ProductListProps) {
               variant={selectedCategory === category ? 'default' : 'outline'}
               size="sm"
               onClick={() => setSelectedCategory(category)}
+              className="h-10 px-4 rounded-full touch-manipulation"
             >
               {category}
             </Button>
@@ -57,7 +59,7 @@ export function ProductList({ products }: ProductListProps) {
           No products found in this category.
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {filteredProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

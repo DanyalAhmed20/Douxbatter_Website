@@ -256,7 +256,7 @@ export function CheckoutForm() {
       <Button
         type="submit"
         size="lg"
-        className="w-full"
+        className="w-full h-14 text-lg touch-manipulation sticky bottom-4 shadow-lg"
         disabled={!isFormValid || isSubmitting}
       >
         {isSubmitting ? (

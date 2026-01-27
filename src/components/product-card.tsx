@@ -22,13 +22,13 @@ export function ProductCard({ product }: ProductCardProps) {
       : `From ${formatCurrency(minPrice)}`;
 
   return (
-    <Card className="overflow-hidden h-full flex flex-col">
+    <Card className="overflow-hidden h-full flex flex-col shadow-md hover:shadow-lg transition-shadow duration-200 active:scale-[0.98] touch-manipulation">
       <ImageCarousel images={product.images} alt={product.name} />
 
-      <CardContent className="p-4 flex-1 flex flex-col">
+      <CardContent className="p-4 sm:p-5 flex-1 flex flex-col">
         <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="font-semibold text-lg leading-tight">{product.name}</h3>
-          <Badge variant="secondary" className="shrink-0">
+          <h3 className="font-semibold text-base sm:text-lg leading-tight">{product.name}</h3>
+          <Badge variant="secondary" className="shrink-0 text-xs">
             {product.category}
           </Badge>
         </div>
@@ -38,11 +38,11 @@ export function ProductCard({ product }: ProductCardProps) {
         </p>
 
         <div className="mt-auto">
-          <p className="font-semibold text-primary mb-2">{priceDisplay}</p>
+          <p className="font-semibold text-primary text-lg mb-3">{priceDisplay}</p>
 
           {/* Variant options preview */}
           {product.variants.length > 1 && (
-            <div className="text-xs text-muted-foreground mb-2">
+            <div className="text-xs text-muted-foreground mb-3">
               {product.variants.map((v) => v.name).join(' | ')}
             </div>
           )}

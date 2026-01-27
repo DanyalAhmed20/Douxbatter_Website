@@ -48,14 +48,15 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
+  --background: #d1ad8c;
+  --foreground: #3d2b1f;
+  --card: #fff9f5;
+  --card-foreground: #3d2b1f;
+  --popover: #fff9f5;
+  --popover-foreground: #3d2b1f;
+  --primary: #5c4033;
+  --primary-foreground: #fff9f5;
+  --nav-background: #b8967a;
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
@@ -127,5 +128,41 @@
 @layer utilities {
   .container {
     @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+}
+
+/* Mobile-first responsive improvements */
+@media (max-width: 640px) {
+  /* Improve touch targets for mobile */
+  button, a, input, select, textarea {
+    min-height: 44px;
+  }
+
+  /* Better spacing for mobile cards */
+  .card {
+    border-radius: 0.75rem;
+  }
+
+  /* Smoother scrolling */
+  html {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Prevent horizontal scroll */
+  body {
+    overflow-x: hidden;
+  }
+}
+
+/* Safe area insets for notched devices */
+@supports (padding: max(0px)) {
+  .container {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+
+  header {
+    padding-top: env(safe-area-inset-top);
   }
 }

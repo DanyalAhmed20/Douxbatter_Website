@@ -98,16 +98,16 @@ export function ImageCarousel({ images, alt, aspectRatio = 'square' }: ImageCaro
       </div>
 
       {/* Dot Indicators */}
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 p-2">
         {images.map((_, index) => (
           <button
             key={index}
             onClick={() => scrollTo(index)}
             className={cn(
-              'w-2 h-2 rounded-full transition-all',
+              'w-2.5 h-2.5 rounded-full transition-all touch-manipulation',
               index === selectedIndex
-                ? 'bg-white scale-110'
-                : 'bg-white/50 hover:bg-white/75'
+                ? 'bg-white scale-125 shadow-md'
+                : 'bg-white/60 hover:bg-white/80'
             )}
             aria-label={`Go to image ${index + 1}`}
           />

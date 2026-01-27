@@ -17,7 +17,7 @@ export function SiteHeader() {
   const whatsappUrl = getWhatsAppContactUrl();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b border-primary/20 shadow-sm" style={{ backgroundColor: 'var(--nav-background)' }}>
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Mobile Menu */}
         <Sheet>
