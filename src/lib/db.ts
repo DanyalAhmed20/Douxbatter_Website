@@ -98,6 +98,12 @@ export function getPool(): mysql.Pool {
 
     const config = parseDatabaseUrl(databaseUrl);
 
+    // Force IPv4 by using 127.0.0.1 instead of localhost
+    // This prevents Node.js from resolving localhost to ::1 (IPv6)
+    if (config.host === 'localhost') {
+      config.host = '127.0.0.1';
+    }
+
     pool = mysql.createPool({
       ...config,
       waitForConnections: true,
