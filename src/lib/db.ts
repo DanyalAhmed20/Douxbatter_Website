@@ -93,7 +93,9 @@ export function getPool(): Pool {
 let productionPool: Pool | null = null;
 
 function createPool(): Pool {
-  const databaseUrl = process.env.DATABASE_URL;
+  // Prefer unpooled connection for Netlify/Neon (avoids protocol issues with PgBouncer)
+  // Falls back to DATABASE_URL for local development
+  const databaseUrl = process.env.NETLIFY_DATABASE_URL_UNPOOLED || process.env.DATABASE_URL;
 
   if (!databaseUrl) {
     throw new Error('DATABASE_URL environment variable is not set');
