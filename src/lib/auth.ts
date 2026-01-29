@@ -71,7 +71,7 @@ export async function createSession(): Promise<void> {
   try {
     // Try to store in database
     await execute(
-      'INSERT INTO admin_sessions (token, expires_at) VALUES (?, ?)',
+      'INSERT INTO admin_sessions (token, expires_at) VALUES ($1, $2)',
       [token, expiresAt]
     );
   } catch {
@@ -107,7 +107,7 @@ export async function verifySession(): Promise<boolean> {
   try {
     // Try to verify in database
     const session = await query<AdminSessionRow>(
-      'SELECT * FROM admin_sessions WHERE token = ? AND expires_at > NOW()',
+      'SELECT * FROM admin_sessions WHERE token = $1 AND expires_at > NOW()',
       [token]
     );
 
@@ -132,7 +132,7 @@ export async function destroySession(): Promise<void> {
     const token = verifySignedToken(signedToken);
     if (token) {
       try {
-        await execute('DELETE FROM admin_sessions WHERE token = ?', [token]);
+        await execute('DELETE FROM admin_sessions WHERE token = $1', [token]);
       } catch {
         // Database unavailable, just delete the cookie
       }

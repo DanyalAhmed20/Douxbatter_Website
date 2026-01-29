@@ -4,7 +4,7 @@ import { generateReferenceNumber } from '@/lib/order-server';
 import { createPaymentIntent, ZiinaError } from '@/lib/ziina';
 import type { Order, OrderItem, UAECity, DeliveryType, DeliveryTimeSlot, SauceOption } from '@/lib/types';
 import { STANDARD_DELIVERY_FEE, EXPRESS_DELIVERY_FEE } from '@/lib/types';
-import type { PoolConnection } from 'mysql2/promise';
+import type { PoolClient } from 'pg';
 
 type CreateOrderRequest = {
   customerName: string;
@@ -44,14 +44,15 @@ export async function POST(request: Request) {
     const referenceNumber = await generateReferenceNumber();
 
     // Create order in database
-    const order = await withTransaction(async (connection: PoolConnection) => {
-      // Insert order
-      const [orderResult] = await connection.execute(
+    const order = await withTransaction(async (client: PoolClient) => {
+      // Insert order and return the id
+      const orderResult = await client.query(
         `INSERT INTO orders (
           reference_number, customer_name, customer_phone, customer_email,
           city, delivery_address, delivery_type, delivery_date, delivery_time_slot,
           subtotal, total, status, payment_status
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'pending')`,
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'pending', 'pending')
+        RETURNING id`,
         [
           referenceNumber,
           body.customerName,
@@ -67,15 +68,15 @@ export async function POST(request: Request) {
         ]
       );
 
-      const orderId = (orderResult as { insertId: number }).insertId;
+      const orderId = orderResult.rows[0].id;
 
       // Insert order items
       for (const item of body.items) {
-        await connection.execute(
+        await client.query(
           `INSERT INTO order_items (
             order_id, product_id, product_name, variant_id, variant_name,
             quantity, unit_price, total_price, selected_sauces
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
           [
             orderId,
             item.productId,
@@ -127,7 +128,7 @@ export async function POST(request: Request) {
 
     // Update order with Ziina payment ID
     await execute(
-      'UPDATE orders SET ziina_payment_id = ? WHERE reference_number = ?',
+      'UPDATE orders SET ziina_payment_id = $1 WHERE reference_number = $2',
       [paymentIntent.id, referenceNumber]
     );
 

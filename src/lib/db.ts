@@ -1,4 +1,4 @@
-import mysql from 'mysql2/promise';
+import { Pool, PoolClient, QueryResultRow } from 'pg';
 
 // Database row types
 export type ProductRow = {
@@ -67,28 +67,10 @@ export type AdminSessionRow = {
   expires_at: Date;
 };
 
-// Parse DATABASE_URL to connection options
-function parseDatabaseUrl(url: string) {
-  const regex = /mysql:\/\/([^:]+):([^@]+)@([^:]+):(\d+)\/(.+)/;
-  const match = url.match(regex);
-
-  if (!match) {
-    throw new Error('Invalid DATABASE_URL format');
-  }
-
-  return {
-    user: match[1],
-    password: decodeURIComponent(match[2]),
-    host: match[3],
-    port: parseInt(match[4], 10),
-    database: match[5],
-  };
-}
-
 // Create connection pool
-let pool: mysql.Pool | null = null;
+let pool: Pool | null = null;
 
-export function getPool(): mysql.Pool {
+export function getPool(): Pool {
   if (!pool) {
     const databaseUrl = process.env.DATABASE_URL;
 
@@ -96,21 +78,11 @@ export function getPool(): mysql.Pool {
       throw new Error('DATABASE_URL environment variable is not set');
     }
 
-    const config = parseDatabaseUrl(databaseUrl);
-
-    // Force IPv4 by using 127.0.0.1 instead of localhost
-    // This prevents Node.js from resolving localhost to ::1 (IPv6)
-    if (config.host === 'localhost') {
-      config.host = '127.0.0.1';
-    }
-
-    pool = mysql.createPool({
-      ...config,
-      waitForConnections: true,
-      connectionLimit: 10,
-      queueLimit: 0,
-      enableKeepAlive: true,
-      keepAliveInitialDelay: 0,
+    pool = new Pool({
+      connectionString: databaseUrl,
+      max: 10,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000,
     });
   }
 
@@ -118,41 +90,50 @@ export function getPool(): mysql.Pool {
 }
 
 // Helper to execute queries
-export async function query<T>(sql: string, params?: unknown[]): Promise<T[]> {
+export async function query<T extends QueryResultRow>(sql: string, params?: unknown[]): Promise<T[]> {
   const pool = getPool();
-  const [rows] = await pool.execute(sql, params);
-  return rows as T[];
+  const result = await pool.query<T>(sql, params);
+  return result.rows;
 }
 
 // Helper for single row queries
-export async function queryOne<T>(sql: string, params?: unknown[]): Promise<T | null> {
+export async function queryOne<T extends QueryResultRow>(sql: string, params?: unknown[]): Promise<T | null> {
   const rows = await query<T>(sql, params);
   return rows[0] || null;
 }
 
+// Execute result type for INSERT/UPDATE/DELETE
+export type ExecuteResult = {
+  rowCount: number | null;
+  rows: Record<string, unknown>[];
+};
+
 // Helper for insert/update/delete
-export async function execute(sql: string, params?: unknown[]): Promise<mysql.ResultSetHeader> {
+export async function execute(sql: string, params?: unknown[]): Promise<ExecuteResult> {
   const pool = getPool();
-  const [result] = await pool.execute(sql, params);
-  return result as mysql.ResultSetHeader;
+  const result = await pool.query(sql, params);
+  return {
+    rowCount: result.rowCount,
+    rows: result.rows,
+  };
 }
 
 // Transaction helper
 export async function withTransaction<T>(
-  callback: (connection: mysql.PoolConnection) => Promise<T>
+  callback: (client: PoolClient) => Promise<T>
 ): Promise<T> {
   const pool = getPool();
-  const connection = await pool.getConnection();
+  const client = await pool.connect();
 
   try {
-    await connection.beginTransaction();
-    const result = await callback(connection);
-    await connection.commit();
+    await client.query('BEGIN');
+    const result = await callback(client);
+    await client.query('COMMIT');
     return result;
   } catch (error) {
-    await connection.rollback();
+    await client.query('ROLLBACK');
     throw error;
   } finally {
-    connection.release();
+    client.release();
   }
 }

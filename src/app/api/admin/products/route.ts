@@ -3,7 +3,7 @@ import { query, withTransaction } from '@/lib/db';
 import { verifySession } from '@/lib/auth';
 import type { ProductRow, ProductVariantRow, ProductImageRow } from '@/lib/db';
 import type { Product, ProductCategory } from '@/lib/types';
-import type { PoolConnection } from 'mysql2/promise';
+import type { PoolClient } from 'pg';
 
 export async function GET() {
   try {
@@ -22,13 +22,16 @@ export async function GET() {
 
     const productIds = productRows.map((p) => p.id);
 
+    // Build PostgreSQL parameterized IN clause
+    const placeholders = productIds.map((_, i) => `$${i + 1}`).join(',');
+
     const [variantRows, imageRows] = await Promise.all([
       query<ProductVariantRow>(
-        `SELECT * FROM product_variants WHERE product_id IN (${productIds.map(() => '?').join(',')})`,
+        `SELECT * FROM product_variants WHERE product_id IN (${placeholders})`,
         productIds
       ),
       query<ProductImageRow>(
-        `SELECT * FROM product_images WHERE product_id IN (${productIds.map(() => '?').join(',')}) ORDER BY display_order`,
+        `SELECT * FROM product_images WHERE product_id IN (${placeholders}) ORDER BY display_order`,
         productIds
       ),
     ]);
@@ -92,11 +95,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    await withTransaction(async (connection: PoolConnection) => {
+    await withTransaction(async (client: PoolClient) => {
       // Insert product
-      await connection.execute(
+      await client.query(
         `INSERT INTO products (id, name, description, category, subcategory, is_active)
-         VALUES (?, ?, ?, ?, ?, ?)`,
+         VALUES ($1, $2, $3, $4, $5, $6)`,
         [
           body.id,
           body.name,
@@ -109,18 +112,18 @@ export async function POST(request: Request) {
 
       // Insert variants
       for (const variant of body.variants || []) {
-        await connection.execute(
+        await client.query(
           `INSERT INTO product_variants (id, product_id, name, price, description)
-           VALUES (?, ?, ?, ?, ?)`,
+           VALUES ($1, $2, $3, $4, $5)`,
           [variant.id, body.id, variant.name, variant.price, variant.description || null]
         );
       }
 
       // Insert images
       for (let i = 0; i < (body.images || []).length; i++) {
-        await connection.execute(
+        await client.query(
           `INSERT INTO product_images (product_id, image_url, display_order)
-           VALUES (?, ?, ?)`,
+           VALUES ($1, $2, $3)`,
           [body.id, body.images[i], i]
         );
       }

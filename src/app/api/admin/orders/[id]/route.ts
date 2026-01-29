@@ -17,7 +17,7 @@ export async function GET(
     const { id } = await params;
 
     const orders = await query<OrderRow>(
-      'SELECT * FROM orders WHERE id = ?',
+      'SELECT * FROM orders WHERE id = $1',
       [id]
     );
 
@@ -29,7 +29,7 @@ export async function GET(
 
     // Get order items
     const itemRows = await query<OrderItemRow>(
-      'SELECT * FROM order_items WHERE order_id = ?',
+      'SELECT * FROM order_items WHERE order_id = $1',
       [orderRow.id]
     );
 
@@ -94,20 +94,24 @@ export async function PATCH(
 
     const updates: string[] = [];
     const updateParams: (string | null)[] = [];
+    let paramIndex = 1;
 
     if (body.status !== undefined) {
-      updates.push('status = ?');
+      updates.push(`status = $${paramIndex}`);
       updateParams.push(body.status);
+      paramIndex++;
     }
 
     if (body.paymentStatus !== undefined) {
-      updates.push('payment_status = ?');
+      updates.push(`payment_status = $${paramIndex}`);
       updateParams.push(body.paymentStatus);
+      paramIndex++;
     }
 
     if (body.adminNotes !== undefined) {
-      updates.push('admin_notes = ?');
+      updates.push(`admin_notes = $${paramIndex}`);
       updateParams.push(body.adminNotes || null);
+      paramIndex++;
     }
 
     if (updates.length === 0) {
@@ -117,7 +121,7 @@ export async function PATCH(
     updateParams.push(id);
 
     await execute(
-      `UPDATE orders SET ${updates.join(', ')} WHERE id = ?`,
+      `UPDATE orders SET ${updates.join(', ')} WHERE id = $${paramIndex}`,
       updateParams
     );
 
@@ -143,7 +147,7 @@ export async function DELETE(
 
     const { id } = await params;
 
-    await execute('DELETE FROM orders WHERE id = ?', [id]);
+    await execute('DELETE FROM orders WHERE id = $1', [id]);
 
     return NextResponse.json({ success: true });
   } catch (error) {

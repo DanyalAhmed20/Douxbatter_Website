@@ -18,30 +18,35 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get('limit') || '20', 10);
     const offset = (page - 1) * limit;
 
-    // Build query with filters
+    // Build query with filters using PostgreSQL numbered parameters
     let sql = 'SELECT * FROM orders WHERE 1=1';
+    let countSql = 'SELECT COUNT(*) as count FROM orders WHERE 1=1';
     const params: (string | number)[] = [];
+    let paramIndex = 1;
 
     if (status) {
-      sql += ' AND status = ?';
+      sql += ` AND status = $${paramIndex}`;
+      countSql += ` AND status = $${paramIndex}`;
       params.push(status);
+      paramIndex++;
     }
 
     if (paymentStatus) {
-      sql += ' AND payment_status = ?';
+      sql += ` AND payment_status = $${paramIndex}`;
+      countSql += ` AND payment_status = $${paramIndex}`;
       params.push(paymentStatus);
+      paramIndex++;
     }
 
     // Get total count
-    const countSql = sql.replace('SELECT *', 'SELECT COUNT(*) as count');
-    const countResult = await query<{ count: number }>(countSql, params);
-    const total = countResult[0]?.count || 0;
+    const countResult = await query<{ count: string }>(countSql, params);
+    const total = parseInt(countResult[0]?.count || '0', 10);
 
     // Add ordering and pagination
-    sql += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
-    params.push(limit, offset);
+    sql += ` ORDER BY created_at DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+    const paginatedParams = [...params, limit, offset];
 
-    const orders = await query<OrderRow>(sql, params);
+    const orders = await query<OrderRow>(sql, paginatedParams);
 
     // Map to simplified order objects (without items for list view)
     const orderList = orders.map((row) => ({

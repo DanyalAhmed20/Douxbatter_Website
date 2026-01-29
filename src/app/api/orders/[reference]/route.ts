@@ -12,7 +12,7 @@ export async function GET(
 
     // Get order
     const orders = await query<OrderRow>(
-      'SELECT * FROM orders WHERE reference_number = ?',
+      'SELECT * FROM orders WHERE reference_number = $1',
       [reference]
     );
 
@@ -24,7 +24,7 @@ export async function GET(
 
     // Get order items
     const itemRows = await query<OrderItemRow>(
-      'SELECT * FROM order_items WHERE order_id = ?',
+      'SELECT * FROM order_items WHERE order_id = $1',
       [orderRow.id]
     );
 

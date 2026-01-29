@@ -35,7 +35,7 @@ export async function POST(request: Request) {
         await execute(
           `UPDATE orders
            SET payment_status = 'paid', status = 'confirmed'
-           WHERE ziina_payment_id = ?`,
+           WHERE ziina_payment_id = $1`,
           [paymentId]
         );
         console.log('Order marked as paid:', paymentId);
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
         await execute(
           `UPDATE orders
            SET payment_status = 'failed'
-           WHERE ziina_payment_id = ?`,
+           WHERE ziina_payment_id = $1`,
           [paymentId]
         );
         console.log('Order payment failed:', paymentId);

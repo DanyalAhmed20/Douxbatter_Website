@@ -8,12 +8,12 @@ export async function generateReferenceNumber(): Promise<string> {
   const prefix = `DB-${datePrefix}-`;
 
   // Get the count of orders for today to generate sequential number
-  const result = await query<{ count: number }>(
-    `SELECT COUNT(*) as count FROM orders WHERE reference_number LIKE ?`,
+  const result = await query<{ count: string }>(
+    `SELECT COUNT(*) as count FROM orders WHERE reference_number LIKE $1`,
     [`${prefix}%`]
   );
 
-  const count = result[0]?.count || 0;
+  const count = parseInt(result[0]?.count || '0', 10);
   const sequentialNumber = String(count + 1).padStart(4, '0');
 
   return `${prefix}${sequentialNumber}`;
