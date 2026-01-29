@@ -4,6 +4,8 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  # Skip secrets scanning for public/non-sensitive env vars
+  SECRETS_SCAN_OMIT_KEYS = "NODE_ENV,NEXT_PUBLIC_BASE_URL,WHATSAPP_BUSINESS_NUMBER"
 
 # Next.js on Netlify uses the @netlify/plugin-nextjs automatically
 [[plugins]]
