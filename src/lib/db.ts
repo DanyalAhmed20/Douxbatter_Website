@@ -1,5 +1,11 @@
 import { Pool, PoolClient, QueryResultRow } from 'pg';
 
+// Extend global to persist pool across hot reloads in development
+declare global {
+  // eslint-disable-next-line no-var
+  var pgPool: Pool | undefined;
+}
+
 // Database row types
 export type ProductRow = {
   id: string;
@@ -67,24 +73,43 @@ export type AdminSessionRow = {
   expires_at: Date;
 };
 
-// Create connection pool
-let pool: Pool | null = null;
-
+// Create connection pool (use global in dev to survive hot reloads)
 export function getPool(): Pool {
-  if (!pool) {
-    const databaseUrl = process.env.DATABASE_URL;
-
-    if (!databaseUrl) {
-      throw new Error('DATABASE_URL environment variable is not set');
+  // In development, use global to persist across hot reloads
+  if (process.env.NODE_ENV !== 'production') {
+    if (!global.pgPool) {
+      global.pgPool = createPool();
     }
-
-    pool = new Pool({
-      connectionString: databaseUrl,
-      max: 10,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 10000,
-    });
+    return global.pgPool;
   }
+
+  // In production, use module-level singleton
+  if (!productionPool) {
+    productionPool = createPool();
+  }
+  return productionPool;
+}
+
+let productionPool: Pool | null = null;
+
+function createPool(): Pool {
+  const databaseUrl = process.env.DATABASE_URL;
+
+  if (!databaseUrl) {
+    throw new Error('DATABASE_URL environment variable is not set');
+  }
+
+  const pool = new Pool({
+    connectionString: databaseUrl,
+    max: 5, // Reduced for serverless
+    idleTimeoutMillis: 10000,
+    connectionTimeoutMillis: 10000,
+  });
+
+  // Handle pool errors
+  pool.on('error', (err) => {
+    console.error('Unexpected pool error:', err);
+  });
 
   return pool;
 }
