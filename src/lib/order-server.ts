@@ -5,10 +5,20 @@ import type { Order, OrderItem, SauceOption } from './types';
 
 // Get order by reference number
 export async function getOrderByReference(reference: string): Promise<Order | null> {
+  return getOrderByField('reference_number', reference);
+}
+
+// Get order by Ziina payment ID
+export async function getOrderByPaymentId(paymentId: string): Promise<Order | null> {
+  return getOrderByField('ziina_payment_id', paymentId);
+}
+
+// Internal helper to get order by any field
+async function getOrderByField(field: string, value: string): Promise<Order | null> {
   try {
     const orders = await query<OrderRow>(
-      'SELECT * FROM orders WHERE reference_number = $1',
-      [reference]
+      `SELECT * FROM orders WHERE ${field} = $1`,
+      [value]
     );
 
     if (orders.length === 0) {

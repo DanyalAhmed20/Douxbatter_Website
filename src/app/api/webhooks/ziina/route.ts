@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { execute } from '@/lib/db';
 import { verifyWebhookSignature } from '@/lib/ziina';
+import { getOrderByPaymentId } from '@/lib/order-server';
+import { sendAdminNewOrderNotification } from '@/lib/email';
 
 type ZiinaWebhookPayload = {
   type: string;
@@ -39,6 +41,12 @@ export async function POST(request: Request) {
           [paymentId]
         );
         console.log('Order marked as paid:', paymentId);
+
+        // Send admin notification email
+        const order = await getOrderByPaymentId(paymentId);
+        if (order) {
+          await sendAdminNewOrderNotification(order);
+        }
         break;
 
       case 'payment_intent.failed':
