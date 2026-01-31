@@ -5,24 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { OrderTracker, OrderDetails } from '@/components/order';
 import { generateCustomerWhatsAppUrl } from '@/lib/whatsapp';
-import type { Order } from '@/lib/types';
-
-async function getOrder(ref: string): Promise<Order | null> {
-  try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:9002';
-    const response = await fetch(`${baseUrl}/api/orders/${ref}`, {
-      cache: 'no-store',
-    });
-
-    if (!response.ok) {
-      return null;
-    }
-
-    return response.json();
-  } catch {
-    return null;
-  }
-}
+import { getOrderByReference } from '@/lib/order-server';
 
 export default async function OrderConfirmationPage({
   params,
@@ -30,7 +13,7 @@ export default async function OrderConfirmationPage({
   params: Promise<{ ref: string }>;
 }) {
   const { ref } = await params;
-  const order = await getOrder(ref);
+  const order = await getOrderByReference(ref);
 
   if (!order) {
     notFound();
