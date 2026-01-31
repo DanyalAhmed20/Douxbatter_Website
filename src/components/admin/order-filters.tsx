@@ -50,14 +50,14 @@ export function OrderFilters({
     <div className="flex flex-wrap gap-4 items-center">
       <div className="w-40">
         <Select
-          value={status}
-          onValueChange={(val) => onStatusChange(val as OrderStatus | '')}
+          value={status || 'all'}
+          onValueChange={(val) => onStatusChange(val === 'all' ? '' : val as OrderStatus)}
         >
           <SelectTrigger>
             <SelectValue placeholder="Order status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All statuses</SelectItem>
+            <SelectItem value="all">All statuses</SelectItem>
             {ORDER_STATUSES.map((s) => (
               <SelectItem key={s.value} value={s.value}>
                 {s.label}
@@ -69,14 +69,14 @@ export function OrderFilters({
 
       <div className="w-40">
         <Select
-          value={paymentStatus}
-          onValueChange={(val) => onPaymentStatusChange(val as PaymentStatus | '')}
+          value={paymentStatus || 'all'}
+          onValueChange={(val) => onPaymentStatusChange(val === 'all' ? '' : val as PaymentStatus)}
         >
           <SelectTrigger>
             <SelectValue placeholder="Payment status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All payments</SelectItem>
+            <SelectItem value="all">All payments</SelectItem>
             {PAYMENT_STATUSES.map((s) => (
               <SelectItem key={s.value} value={s.value}>
                 {s.label}
